@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: auth-kit
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ACCESS_TOKEN_EXPIRY
+        value: 15m
+      - key: REFRESH_TOKEN_EXPIRY
+        value: 7d
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: MONGO_URI
+        sync: false
+      - key: MONGO_DB_NAME
+        value: auth-service
