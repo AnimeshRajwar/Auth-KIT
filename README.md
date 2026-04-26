@@ -1,3 +1,5 @@
+![AuthKit Logo](public/assests/logo.png)
+
 # 🔐 AuthKit
 
 A self-hosted authentication service with a **built-in dashboard UI** — like a personal Supabase for auth.  

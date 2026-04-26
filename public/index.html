@@ -6,6 +6,8 @@
 <title>AuthKit — Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Satisfy&display=swap" rel="stylesheet">
+<link href="https://fonts.cdnfonts.com/css/konstrukt" rel="stylesheet">
 <style>
   :root {
     --bg: #0a0a0f;
@@ -70,6 +72,12 @@
     margin-bottom: 40px;
   }
 
+  .auth-logo .sidebar-logo {
+    font-size: 40px;
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+
   .auth-logo-mark {
     display: inline-flex;
     align-items: center;
@@ -79,6 +87,21 @@
     font-weight: 600;
     color: var(--text);
     letter-spacing: -0.5px;
+  }
+
+  .brand-auth {
+    color: #fff;
+    font-family: 'Satisfy', cursive;
+    font-size: 1.1em;
+    line-height: 1;
+  }
+
+  .brand-kit {
+    color: var(--accent);
+    font-family: 'KONSTRUKT', 'IBM Plex Mono', monospace;
+    text-transform: lowercase;
+    letter-spacing: 0.02em;
+    line-height: 1;
   }
 
   .logo-icon {
@@ -234,7 +257,7 @@
 
   .sidebar-logo {
     font-family: var(--mono);
-    font-size: 15px;
+    font-size: 30px;
     font-weight: 600;
     color: var(--text);
     letter-spacing: -0.3px;
@@ -248,7 +271,7 @@
 
   .nav-section-label {
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: 15px;
     color: var(--text3);
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -263,7 +286,7 @@
     border-radius: var(--radius);
     cursor: pointer;
     color: var(--text2);
-    font-size: 13px;
+    font-size: 15px;
     transition: all var(--transition);
     border: none;
     background: none;
@@ -398,14 +421,14 @@
 
   .project-name {
     font-family: var(--mono);
-    font-size: 14px;
+    font-size: 20px;
     font-weight: 600;
     color: var(--text);
     margin-bottom: 4px;
   }
 
   .project-desc {
-    font-size: 12px;
+    font-size: 19px;
     color: var(--text3);
     margin-bottom: 14px;
     min-height: 18px;
@@ -415,7 +438,7 @@
     display: flex;
     gap: 12px;
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: 15px;
     color: var(--text3);
   }
 
@@ -697,9 +720,9 @@
     padding: 16px 18px;
   }
 
-  .stat-label { font-family: var(--mono); font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
-  .stat-value { font-family: var(--mono); font-size: 24px; font-weight: 600; color: var(--text); }
-  .stat-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .stat-label { font-family: var(--mono); font-size: 19px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .stat-value { font-family: var(--mono); font-size: 30px; font-weight: 600; color: var(--text); }
+  .stat-sub { font-size: 16px; color: var(--text3); margin-top: 2px; }
 
   /* ── Toast ── */
   #toast {
@@ -1326,6 +1349,7 @@
       transform: translateX(-105%);
       transition: transform 180ms ease;
       box-shadow: 16px 0 40px rgba(0,0,0,0.45);
+      overflow: hidden;
     }
 
     body.mobile-sidebar-open .sidebar {
@@ -1333,7 +1357,9 @@
     }
 
     .sidebar-nav {
-      max-height: calc(100vh - 132px);
+      min-height: 0;
+      max-height: none;
+      overflow-y: auto;
     }
 
     .sidebar-footer {
@@ -1605,8 +1631,7 @@
   <div class="auth-box">
     <div class="auth-logo">
       <div class="auth-logo-mark">
-        <div class="logo-icon">⚡</div>
-        AuthKit
+        <span class="sidebar-logo"><span class="brand-auth">Auth</span><span class="brand-kit">kit</span></span>
       </div>
     </div>
 
@@ -1649,8 +1674,7 @@
   <!-- Sidebar -->
   <div class="sidebar">
     <div class="sidebar-header">
-      <div class="logo-icon" style="width:26px;height:26px;font-size:13px;">⚡</div>
-      <span class="sidebar-logo">AuthKit</span>
+      <span class="sidebar-logo"><span class="brand-auth">Auth</span><span class="brand-kit">kit</span></span>
     </div>
     <div class="sidebar-nav">
       <div class="nav-section-label">Navigation</div>
