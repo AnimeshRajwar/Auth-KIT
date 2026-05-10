@@ -10,9 +10,13 @@ const password = 'SuperSecret99';
 let accessToken, refreshToken, apiKey;
 
 async function req(method, path, body, headers = {}) {
+  const reqHeaders = { ...headers };
+  if (body) {
+    reqHeaders['Content-Type'] = 'application/json';
+  }
   const res = await fetch(`${BASE}${path}`, {
     method,
-    headers: { 'Content-Type': 'application/json', ...headers },
+    headers: reqHeaders,
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await res.json();

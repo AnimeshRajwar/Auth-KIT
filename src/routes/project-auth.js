@@ -9,7 +9,7 @@ const crypto = require('crypto');
 const { getCollection } = require('../db');
 const { authenticate } = require('../middleware/auth');
 const { getProjectDb, evictProjectDb } = require('../db/project-db');
-const { hashApiKey } = require('../utils/tokens');
+const { generateRefreshToken, hashRefreshToken, hashApiKey } = require('../utils/tokens');
 
 async function projectAuthRoutes(fastify) {
 
@@ -116,9 +116,10 @@ async function projectAuthRoutes(fastify) {
       { expiresIn: process.env.ACCESS_TOKEN_EXPIRY || '15m' }
     );
 
-    const refreshToken = crypto.randomBytes(64).toString('hex');
+    const refreshToken = generateRefreshToken();
+    const refreshTokenHash = hashRefreshToken(refreshToken);
     await pdb.createRefreshToken({
-      token: refreshToken,
+      token: refreshTokenHash,
       user_id: user.id,
       expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       created_at: new Date().toISOString(),
@@ -143,25 +144,27 @@ async function projectAuthRoutes(fastify) {
     if (!ctx) return;
     const { pdb } = ctx;
 
-    const record = await pdb.findRefreshToken(refresh_token);
+    const refreshTokenHash = hashRefreshToken(refresh_token);
+    const record = await pdb.findRefreshToken(refreshTokenHash);
     if (!record) return reply.status(401).send({ error: 'Invalid refresh token' });
     if (new Date(record.expires_at) < new Date()) {
-      await pdb.deleteRefreshToken(refresh_token);
+      await pdb.deleteRefreshToken(refreshTokenHash);
       return reply.status(401).send({ error: 'Refresh token expired' });
     }
 
     const user = await pdb.findUser({ id: record.user_id });
     if (!user) return reply.status(401).send({ error: 'User not found' });
 
-    await pdb.deleteRefreshToken(refresh_token);
+    await pdb.deleteRefreshToken(refreshTokenHash);
 
     const accessToken = fastify.jwt.sign(
       { id: user.id, email: user.email, project_id: projectId },
       { expiresIn: process.env.ACCESS_TOKEN_EXPIRY || '15m' }
     );
-    const newRefreshToken = crypto.randomBytes(64).toString('hex');
+    const newRefreshToken = generateRefreshToken();
+    const newRefreshTokenHash = hashRefreshToken(newRefreshToken);
     await pdb.createRefreshToken({
-      token: newRefreshToken,
+      token: newRefreshTokenHash,
       user_id: user.id,
       expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       created_at: new Date().toISOString(),
@@ -178,7 +181,8 @@ async function projectAuthRoutes(fastify) {
 
     const ctx = await resolveProject(projectId, reply, request);
     if (!ctx) return;
-    await ctx.pdb.deleteRefreshToken(refresh_token);
+    const refreshTokenHash = hashRefreshToken(refresh_token);
+    await ctx.pdb.deleteRefreshToken(refreshTokenHash);
     return reply.send({ message: 'Logged out successfully' });
   });
 

@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { getCollection } = require('../db');
 const { authenticate } = require('../middleware/auth');
-const { generateApiKey, hashApiKey } = require('../utils/tokens');
+const { generateApiKey, hashApiKey, generateRefreshToken, hashRefreshToken } = require('../utils/tokens');
 
 async function authRoutes(fastify) {
   // ─── Register ────────────────────────────────────────────────────────────────
@@ -74,11 +74,12 @@ async function authRoutes(fastify) {
       { expiresIn: process.env.ACCESS_TOKEN_EXPIRY || '15m' }
     );
 
-    const refreshToken = crypto.randomBytes(64).toString('hex');
+    const refreshToken = generateRefreshToken();
+    const refreshTokenHash = hashRefreshToken(refreshToken);
     const refreshExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days
 
     await refreshTokens.insertOne({
-      token: refreshToken,
+      token: refreshTokenHash,
       user_id: user.id,
       expires_at: refreshExpiry,
       created_at: new Date().toISOString(),
@@ -107,12 +108,13 @@ async function authRoutes(fastify) {
     const users = await getCollection('users');
     const refreshTokens = await getCollection('refresh_tokens');
 
-    const record = await refreshTokens.findOne({ token: refresh_token });
+    const refreshTokenHash = hashRefreshToken(refresh_token);
+    const record = await refreshTokens.findOne({ token: refreshTokenHash });
     if (!record) {
       return reply.status(401).send({ error: 'Invalid refresh token' });
     }
     if (new Date(record.expires_at) < new Date()) {
-      await refreshTokens.deleteOne({ token: refresh_token });
+      await refreshTokens.deleteOne({ token: refreshTokenHash });
       return reply.status(401).send({ error: 'Refresh token expired' });
     }
 
@@ -122,17 +124,18 @@ async function authRoutes(fastify) {
     }
 
     // Rotate: delete old, issue new
-    await refreshTokens.deleteOne({ token: refresh_token });
+    await refreshTokens.deleteOne({ token: refreshTokenHash });
 
     const accessToken = fastify.jwt.sign(
       { id: user.id, email: user.email },
       { expiresIn: process.env.ACCESS_TOKEN_EXPIRY || '15m' }
     );
-    const newRefreshToken = crypto.randomBytes(64).toString('hex');
+    const newRefreshToken = generateRefreshToken();
+    const newRefreshTokenHash = hashRefreshToken(newRefreshToken);
     const refreshExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
     await refreshTokens.insertOne({
-      token: newRefreshToken,
+      token: newRefreshTokenHash,
       user_id: user.id,
       expires_at: refreshExpiry,
       created_at: new Date().toISOString(),
@@ -157,7 +160,8 @@ async function authRoutes(fastify) {
   }, async (request, reply) => {
     const { refresh_token } = request.body;
     const refreshTokens = await getCollection('refresh_tokens');
-    await refreshTokens.deleteOne({ token: refresh_token });
+    const refreshTokenHash = hashRefreshToken(refresh_token);
+    await refreshTokens.deleteOne({ token: refreshTokenHash });
     return reply.send({ message: 'Logged out successfully' });
   });
 

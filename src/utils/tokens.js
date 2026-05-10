@@ -16,4 +16,18 @@ function hashApiKey(apiKey) {
   return crypto.createHash('sha256').update(apiKey).digest('hex');
 }
 
-module.exports = { generateApiKey, hashApiKey };
+/**
+ * Generate a refresh token
+ */
+function generateRefreshToken() {
+  return crypto.randomBytes(64).toString('hex');
+}
+
+/**
+ * Hash a refresh token for storage (never store raw tokens)
+ */
+function hashRefreshToken(token) {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+module.exports = { generateApiKey, hashApiKey, generateRefreshToken, hashRefreshToken };
