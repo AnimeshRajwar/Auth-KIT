@@ -1,10 +1,8 @@
 const { hashApiKey } = require('../utils/tokens');
 const { getCollection } = require('../db');
 
-/**
- * Middleware: authenticate via JWT Bearer token OR API Key header.
- * Attaches `request.user` on success.
- */
+//authenticate via JWT Bearer token OR API Key header.
+
 async function authenticate(request, reply) {
   const apiKey = request.headers['x-api-key'];
 

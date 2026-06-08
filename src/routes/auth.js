@@ -5,7 +5,7 @@ const { authenticate } = require('../middleware/auth');
 const { generateApiKey, hashApiKey, generateRefreshToken, hashRefreshToken } = require('../utils/tokens');
 
 async function authRoutes(fastify) {
-  // ─── Register ────────────────────────────────────────────────────────────────
+  // register
   fastify.post('/auth/register', {
     schema: {
       body: {
@@ -42,7 +42,7 @@ async function authRoutes(fastify) {
     });
   });
 
-  // ─── Login ───────────────────────────────────────────────────────────────────
+  // login
   fastify.post('/auth/login', {
     schema: {
       body: {
@@ -94,7 +94,7 @@ async function authRoutes(fastify) {
     });
   });
 
-  // ─── Refresh Token ───────────────────────────────────────────────────────────
+  // refresh token
   fastify.post('/auth/refresh', {
     schema: {
       body: {
@@ -123,7 +123,7 @@ async function authRoutes(fastify) {
       return reply.status(401).send({ error: 'User not found' });
     }
 
-    // Rotate: delete old, issue new
+    // rotate: delete old, issue new
     await refreshTokens.deleteOne({ token: refreshTokenHash });
 
     const accessToken = fastify.jwt.sign(
@@ -148,7 +148,7 @@ async function authRoutes(fastify) {
     });
   });
 
-  // ─── Logout ──────────────────────────────────────────────────────────────────
+  // logout
   fastify.post('/auth/logout', {
     schema: {
       body: {
@@ -165,7 +165,7 @@ async function authRoutes(fastify) {
     return reply.send({ message: 'Logged out successfully' });
   });
 
-  // ─── Me (protected) ──────────────────────────────────────────────────────────
+  // me (protected)
   fastify.get('/auth/me', { preHandler: authenticate }, async (request, reply) => {
     const userId = request.user.id;
     const users = await getCollection('users');
@@ -184,7 +184,7 @@ async function authRoutes(fastify) {
     });
   });
 
-  // ─── Create API Key (protected) ───────────────────────────────────────────────
+  // create API key (protected)
   fastify.post('/auth/api-keys', { preHandler: authenticate }, async (request, reply) => {
     const { name } = request.body || {};
     const userId = request.user.id;
@@ -205,7 +205,7 @@ async function authRoutes(fastify) {
 
     await apiKeysCollection.insertOne(keyRecord);
 
-    // Raw key returned ONCE — never shown again
+    // raw key returned ONCE — never shown again
     return reply.status(201).send({
       message: 'API key created. Store it securely — it will not be shown again.',
       api_key: rawKey,
@@ -214,7 +214,7 @@ async function authRoutes(fastify) {
     });
   });
 
-  // ─── Revoke API Key (protected) ───────────────────────────────────────────────
+  // revoke API Key (protected)
   fastify.delete('/auth/api-keys/:keyId', { preHandler: authenticate }, async (request, reply) => {
     const { keyId } = request.params;
     const userId = request.user.id;

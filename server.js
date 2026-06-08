@@ -8,7 +8,7 @@ const fastify = require('fastify')({
   },
 });
 
-// ── Plugins ───────────────────────────────────────────────────────────────────
+//plugins
 fastify.register(require('@fastify/cors'), { origin: true });
 
 fastify.register(require('@fastify/jwt'), {
@@ -20,15 +20,15 @@ fastify.register(require('@fastify/static'), {
   prefix: '/',
 });
 
-// ── Routes ────────────────────────────────────────────────────────────────────
+//routes
 fastify.register(require('./src/routes/auth'));
 fastify.register(require('./src/routes/projects'));
 fastify.register(require('./src/routes/project-auth'));
 
-// ── Health Check ──────────────────────────────────────────────────────────────
+//health
 fastify.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
 
-// ── Start ─────────────────────────────────────────────────────────────────────
+
 const start = async () => {
   try {
     const port = parseInt(process.env.PORT || '3001', 10);

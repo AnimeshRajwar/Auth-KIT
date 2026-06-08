@@ -1,9 +1,3 @@
-/**
- * Project-scoped auth routes
- * All under /p/:projectId/auth/...
- * Users are stored in the project's own database (Postgres / MySQL / MongoDB)
- */
-
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { getCollection } = require('../db');
@@ -35,7 +29,7 @@ async function projectAuthRoutes(fastify) {
     }
   }
 
-  // Helper: resolve project and its db, or 404
+  //resolve project and its db, or 404
   async function resolveProject(projectId, reply, request) {
     const projectsCollection = await getCollection('projects');
     const project = await projectsCollection.findOne({ id: projectId });
@@ -63,13 +57,13 @@ async function projectAuthRoutes(fastify) {
     }
   }
 
-  // ── Register ──────────────────────────────────────────────────────────────
+  //register
   fastify.post('/p/:projectId/auth/register', { preHandler: requireProjectApiKey }, async (request, reply) => {
     const { projectId } = request.params;
     const { email, password } = request.body || {};
 
     if (!email || !password) return reply.status(400).send({ error: 'email and password are required' });
-    if (password.length < 8)  return reply.status(400).send({ error: 'password must be at least 8 characters' });
+    if (password.length < 8) return reply.status(400).send({ error: 'password must be at least 8 characters' });
 
     const ctx = await resolveProject(projectId, reply, request);
     if (!ctx) return;
@@ -94,7 +88,7 @@ async function projectAuthRoutes(fastify) {
     });
   });
 
-  // ── Login ─────────────────────────────────────────────────────────────────
+  //login
   fastify.post('/p/:projectId/auth/login', { preHandler: requireProjectApiKey }, async (request, reply) => {
     const { projectId } = request.params;
     const { email, password } = request.body || {};
@@ -134,7 +128,7 @@ async function projectAuthRoutes(fastify) {
     });
   });
 
-  // ── Refresh ───────────────────────────────────────────────────────────────
+  //refresh
   fastify.post('/p/:projectId/auth/refresh', async (request, reply) => {
     const { projectId } = request.params;
     const { refresh_token } = request.body || {};
@@ -173,7 +167,7 @@ async function projectAuthRoutes(fastify) {
     return reply.send({ access_token: accessToken, refresh_token: newRefreshToken, token_type: 'Bearer' });
   });
 
-  // ── Logout ────────────────────────────────────────────────────────────────
+  //logout
   fastify.post('/p/:projectId/auth/logout', async (request, reply) => {
     const { projectId } = request.params;
     const { refresh_token } = request.body || {};
@@ -186,7 +180,7 @@ async function projectAuthRoutes(fastify) {
     return reply.send({ message: 'Logged out successfully' });
   });
 
-  // ── Me ────────────────────────────────────────────────────────────────────
+  // me
   fastify.get('/p/:projectId/auth/me', async (request, reply) => {
     const { projectId } = request.params;
 
@@ -208,7 +202,7 @@ async function projectAuthRoutes(fastify) {
     return reply.send({ user: { id: user.id, email: user.email, created_at: user.created_at } });
   });
 
-  // ── User count (for dashboard stats) ─────────────────────────────────────
+  // user count (for dashboard stats)
   fastify.get('/p/:projectId/stats', { preHandler: authenticate }, async (request, reply) => {
     const { projectId } = request.params;
     const userId = request.user.id;
@@ -232,7 +226,7 @@ async function projectAuthRoutes(fastify) {
     }
   });
 
-  // ── Test DB connection ────────────────────────────────────────────────────
+  // test DB connection
   fastify.post('/p/:projectId/db/test', { preHandler: authenticate }, async (request, reply) => {
     const { projectId } = request.params;
     const userId = request.user.id;
@@ -248,7 +242,7 @@ async function projectAuthRoutes(fastify) {
     }
 
     try {
-      // Test candidate URL without persisting it on the project
+      // test candidate URL without persisting it on the project
       evictProjectDb(projectId);
       const candidateProject = { ...project, db_url: testUrl };
       const pdb = await getProjectDb(candidateProject);

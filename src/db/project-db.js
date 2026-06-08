@@ -1,17 +1,3 @@
-/**
- * Per-project DB adapter
- * Supports: postgres, mysql, mongodb
- *
- * Usage:
- *   const db = await getProjectDb(project)
- *   await db.findUser({ email })
- *   await db.createUser({ id, email, password_hash, project_id, created_at })
- *   await db.findRefreshToken(token)
- *   await db.createRefreshToken({ token, user_id, expires_at, created_at })
- *   await db.deleteRefreshToken(token)
- */
-
-// ─── In-memory pool: projectId → adapter instance ────────────────────────────
 const pool = new Map();
 
 async function getProjectDb(project) {
@@ -86,7 +72,7 @@ async function createPostgresAdapter(url, projectId) {
       const conditions = [];
       const values = [];
       let i = 1;
-      if (query.id)    { conditions.push(`id = $${i++}`);    values.push(query.id); }
+      if (query.id) { conditions.push(`id = $${i++}`); values.push(query.id); }
       if (query.email) { conditions.push(`email = $${i++}`); values.push(query.email); }
       conditions.push(`project_id = $${i++}`);
       values.push(projectId);
@@ -130,7 +116,7 @@ async function createPostgresAdapter(url, projectId) {
       await pg.query('SELECT 1');
       return true;
     },
-    close() { pg.end().catch(() => {}); },
+    close() { pg.end().catch(() => { }); },
   };
 }
 
@@ -176,7 +162,7 @@ async function createMysqlAdapter(url, projectId) {
     async findUser(query) {
       const conditions = ['project_id = ?'];
       const values = [projectId];
-      if (query.id)    { conditions.push('id = ?');    values.push(query.id); }
+      if (query.id) { conditions.push('id = ?'); values.push(query.id); }
       if (query.email) { conditions.push('email = ?'); values.push(query.email); }
       const [rows] = await conn.query(
         `SELECT * FROM authkit_users WHERE ${conditions.join(' AND ')} LIMIT 1`,
@@ -218,7 +204,7 @@ async function createMysqlAdapter(url, projectId) {
       await conn.query('SELECT 1');
       return true;
     },
-    close() { conn.end().catch(() => {}); },
+    close() { conn.end().catch(() => { }); },
   };
 }
 
@@ -267,7 +253,7 @@ async function createMongoAdapter(url, projectId) {
       await mongoDb.command({ ping: 1 });
       return true;
     },
-    close() { client.close().catch(() => {}); },
+    close() { client.close().catch(() => { }); },
   };
 }
 
